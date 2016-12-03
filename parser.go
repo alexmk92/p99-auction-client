@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"github.com/alexmk92/stringutil"
 	"time"
+	"strconv"
 )
 
 type AuctionParser struct {}
@@ -23,7 +24,7 @@ func (p *AuctionParser) isAuctionLine(line string) bool {
 
 func (p *AuctionParser) extractSaleInformation(line string) {
 	fmt.Println("Extracting information from: ", line)
-	line = "[Wed Nov 23 23:26:10 2016] Kongsong auctions, 'WTS Jagged Blade of Mourning || Wavecrasher || Holgresh Elder Beads, WtB Holgresh Elder Beads, Amulet of Necropotence | Lodizal Shield && Turtle Bone Bracer'"
+	line = "[Wed Nov 23 23:26:10 2016] Kongsong auctions, 'WTS Vindication || Wurmslayer || Jagged Blade of Mourning || Wavecrasher || Holgresh Elder Beads, WtB Holgresh Elder Beads, Amulet of Necropotence | Lodizal Shield && Turtle Bone Bracer'"
 
 	auction := Auction {}
 
@@ -55,28 +56,31 @@ func (p *AuctionParser) extractSaleInformation(line string) {
 		fmt.Println("SALES ONLY")
 	}
 
+	// trim any leading/trailing space so that we only explode string list on proper constraints
+	items = strings.TrimSpace(items)
 	itemList := strings.FieldsFunc(items, func(r rune) bool {
 		switch r {
-		case '|', ',':
+		case '|', ',', '-', ':', '/', '&':
 			return true;
 		}
 		return false
 	})
 
 	fmt.Println("Seller is: ", seller)
-	fmt.Println("Sale data is: ", itemList)
 
-	i := Item {
-		name: "ALEX",
+	fetchChannel := make(chan bool)
+	for _, itemName := range itemList {
+		itemName = strings.TrimSpace(itemName)
+		fmt.Println("Item is: " + itemName + ", length is: " + strconv.Itoa(len(itemName)))
+		item := Item {
+			name: itemName,
+		}
+		item.FetchData(fetchChannel)
 	}
-	p.fetchItemDataFromWiki(&i)
+
 
 	auction.auctioned_at = t
 
 	fmt.Println(json.Marshal(auction))
 	//return nil
-}
-
-func (p *AuctionParser) fetchItemDataFromWiki(item *Item) {
-	item.name = "GARY"
 }

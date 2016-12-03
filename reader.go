@@ -52,7 +52,7 @@ func (r *AuctionReader) read(channel chan <- string) {
 		lastLine := ""
 
 		for scanner.Scan() {
-			lineString := strings.Replace(scanner.Text(), "You auction", "Kongsong auctions", -1)
+			lineString := strings.Replace(scanner.Text(), "You auction", (EQ_CHARACTER + " auctions"), -1)
 			//fmt.Println(strconv.Itoa(i) + " - " + lineString)
 			totalLines++
 			if(parser.isAuctionLine(lineString)) {
